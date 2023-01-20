@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract Counter {
-    uint256 public number;
+contract TradeCentral{
+     address public owner;
+     uint256 itemCount;
+     struct Trade{
+        uint256 id;
+         address buyer;
+         address seller;
+         uint256 amount;
+         uint256 price;
+         string name;
+         string description;
+         string image;
+     }
 
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
-    }
 
-    function increment() public {
-        number++;
-    }
 }
