@@ -8,12 +8,22 @@ contract TradeCentral{
         uint256 id;
          address buyer;
          address seller;
-         uint256 amount;
          uint256 price;
          string name;
          string description;
          string image;
      }
+
+     struct userData{
+            address user;
+            Trade[] trades;
+            string email;
+            string name;
+            string image;
+            
+                
+                 }
+   
 
 
 }
