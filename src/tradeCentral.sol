@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract TradeCentral {
+import "../lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+contract TradeCentral is ReentrancyGuard {
 
      //@dev global variables
     address public owner;
@@ -42,7 +43,7 @@ contract TradeCentral {
         string memory _email,
         string memory _name,
         string memory image
-    ) external {
+    ) external nonReentrant {
         require(msg.sender != address(0), "Invalid address");
         require(bytes(_email).length > 0, "Invalid email");
         require(bytes(_name).length > 0, "Invalid name");
@@ -65,7 +66,7 @@ contract TradeCentral {
         string memory _name,
         string memory _description,
         string memory _image
-    ) external {
+    ) external nonReentrant {
         require(msg.sender != address(0), "Invalid address");
         require(_price > 0, "Invalid price");
         require(bytes(_name).length > 0, "Invalid name");
@@ -90,7 +91,7 @@ contract TradeCentral {
           string memory _email,
           string memory _name,
           string memory _image
-     ) external {
+     ) external  nonReentrant{
           require(msg.sender != address(0), "Invalid address");
           require(bytes(_email).length > 0, "Invalid email");
           require(msg.sender == users[userCount].user, "Invalid user");
