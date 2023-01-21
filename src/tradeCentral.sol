@@ -83,4 +83,21 @@ contract TradeCentral {
         );
         users[userCount].trades.push(trades[tradeCount]);
     }
+
+    //@dev function for update profile user
+
+     function updateProfile(
+          string memory _email,
+          string memory _name,
+          string memory _image
+     ) external {
+          require(msg.sender != address(0), "Invalid address");
+          require(bytes(_email).length > 0, "Invalid email");
+          require(msg.sender == users[userCount].user, "Invalid user");
+          require(bytes(_name).length > 0, "Invalid name");
+          require(bytes(_image).length > 0, "Invalid image");
+          users[userCount].email = _email;
+          users[userCount].name = _name;
+          users[userCount].image = _image;
+     }
 }
