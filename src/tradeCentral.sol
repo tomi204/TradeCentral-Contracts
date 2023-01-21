@@ -107,4 +107,10 @@ contract TradeCentral {
          Trade storage _trade = trades[_itemId];
            return _trade;
      }
+
+     //@dev function for look users in the market
+      function lookUsers(uint256 _userId) public view returns(userData memory){
+         userData storage _user = users[_userId];
+           return _user;
+     }
 }
