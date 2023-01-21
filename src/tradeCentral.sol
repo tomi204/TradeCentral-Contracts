@@ -57,4 +57,30 @@ contract TradeCentral {
             image
         );
     }
+
+    //@dev function create one trade
+
+    function createTrade(
+        uint256 _price,
+        string memory _name,
+        string memory _description,
+        string memory _image
+    ) external {
+        require(msg.sender != address(0), "Invalid address");
+        require(_price > 0, "Invalid price");
+        require(bytes(_name).length > 0, "Invalid name");
+        require(bytes(_description).length > 0, "Invalid description");
+        require(bytes(_image).length > 0, "Invalid image");
+        tradeCount++;
+        trades[tradeCount] = Trade(
+            tradeCount,
+            msg.sender,
+            address(0),
+            _price,
+            _name,
+            _description,
+            _image
+        );
+        users[userCount].trades.push(trades[tradeCount]);
+    }
 }
