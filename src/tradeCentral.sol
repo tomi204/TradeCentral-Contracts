@@ -100,4 +100,11 @@ contract TradeCentral {
           users[userCount].name = _name;
           users[userCount].image = _image;
      }
+
+
+     //@dev function for look trades in the market
+      function lookTrades(uint256 _itemId) public view returns(Trade memory){
+         Trade storage _trade = trades[_itemId];
+           return _trade;
+     }
 }
