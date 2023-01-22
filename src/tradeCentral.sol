@@ -19,6 +19,7 @@ contract TradeCentral is ReentrancyGuard {
         string name;
         string description;
         string image;
+        bool isSold;
     }
 
     struct userData {
@@ -80,7 +81,8 @@ contract TradeCentral is ReentrancyGuard {
             _price,
             _name,
             _description,
-            _image
+            _image,
+            false
         );
         users[userCount].trades.push(trades[tradeCount]);
     }
@@ -114,4 +116,35 @@ contract TradeCentral is ReentrancyGuard {
          userData storage _user = users[_userId];
            return _user;
      }
+
+     //@dev function for buy one trade
+      function buyTrade(uint256 _itemId) public payable nonReentrant{
+          require(msg.value == trades[_itemId].price, "Invalid value");
+          require(trades[_itemId].isSold == false, "Invalid trade, item sold");
+          require(trades[_itemId].buyer == address(0), "Invalid buyer");
+          require(trades[_itemId].seller != address(0), "Invalid seller");
+          require(trades[_itemId].seller != msg.sender, "Invalid seller");
+          trades[_itemId].buyer = msg.sender;
+            trades[_itemId].isSold = true;
+          payable(trades[_itemId].seller).transfer(msg.value);
+      }
+
+      //@dev function for cancel one trade
+      function cancelTrade(uint256 _itemId) public nonReentrant{
+          require(msg.sender != address(0), "Invalid address");
+          require(trades[_itemId].isSold == false, "Invalid trade, item sold");
+          require(trades[_itemId].seller != address(0), "Invalid seller");
+          require(trades[_itemId].seller == msg.sender, "Invalid seller");
+          delete trades[_itemId];
+      }
+
+      //@dev function for withdraw one trade
+      function cancelAllTrades() public nonReentrant{
+          require(msg.sender != address(0), "Invalid address");
+          for(uint256 i = 1; i <= tradeCount; i++){
+              if(trades[i].seller == msg.sender){
+                  delete trades[i];
+              }
+          }
+}
 }
