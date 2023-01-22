@@ -25,7 +25,6 @@ contract TradeCentral is ReentrancyGuard {
     struct userData {
         uint256 id;
         address user;
-        Trade[] trades;
         string email;
         string name;
         string image;
@@ -53,7 +52,6 @@ contract TradeCentral is ReentrancyGuard {
         users[userCount] = userData(
             userCount,
             msg.sender,
-            new Trade[](0),
             _email,
             _name,
             image
@@ -76,15 +74,14 @@ contract TradeCentral is ReentrancyGuard {
         tradeCount++;
         trades[tradeCount] = Trade(
             tradeCount,
+           address(0),
             msg.sender,
-            address(0),
             _price,
             _name,
             _description,
             _image,
             false
         );
-        users[userCount].trades.push(trades[tradeCount]);
     }
 
     //@dev function for update profile user
@@ -121,12 +118,12 @@ contract TradeCentral is ReentrancyGuard {
       function buyTrade(uint256 _itemId) public payable nonReentrant{
           require(msg.value == trades[_itemId].price, "Invalid value");
           require(trades[_itemId].isSold == false, "Invalid trade, item sold");
-          require(trades[_itemId].buyer == address(0), "Invalid buyer");
           require(trades[_itemId].seller != address(0), "Invalid seller");
           require(trades[_itemId].seller != msg.sender, "Invalid seller");
           trades[_itemId].buyer = msg.sender;
             trades[_itemId].isSold = true;
           payable(trades[_itemId].seller).transfer(msg.value);
+          delete trades[_itemId];
       }
 
       //@dev function for cancel one trade
