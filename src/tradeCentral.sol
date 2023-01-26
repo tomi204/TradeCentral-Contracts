@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "../lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-contract TradeCentral is ReentrancyGuard {
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-     //@dev global variables
+contract TradeCentral is ReentrancyGuard {
+    //@dev global variables
     address public owner;
 
     uint256 userCount;
     uint256 tradeCount;
 
-//@dev structs
+    //@dev structs
     struct Trade {
         uint256 id;
         address buyer;
@@ -23,22 +23,22 @@ contract TradeCentral is ReentrancyGuard {
     }
 
     struct userData {
-        uint256 id;
+        uint256 userId;
         address user;
         string email;
         string name;
         string image;
     }
 
-    mapping(uint256 => userData) public users;
+    mapping(address => userData) public users;
     mapping(uint256 => Trade) public trades;
 
-//@dev constructor
+    //@dev constructor
     constructor() {
         owner = msg.sender;
     }
 
-//@dev function  create one userr
+    //@dev function  create one userr
     function createUser(
         string memory _email,
         string memory _name,
@@ -49,7 +49,7 @@ contract TradeCentral is ReentrancyGuard {
         require(bytes(_name).length > 0, "Invalid name");
         require(bytes(image).length > 0, "Invalid image");
         userCount++;
-        users[userCount] = userData(
+        users[msg.sender] = userData(
             userCount,
             msg.sender,
             _email,
@@ -74,7 +74,7 @@ contract TradeCentral is ReentrancyGuard {
         tradeCount++;
         trades[tradeCount] = Trade(
             tradeCount,
-           address(0),
+            address(0),
             msg.sender,
             _price,
             _name,
@@ -86,62 +86,55 @@ contract TradeCentral is ReentrancyGuard {
 
     //@dev function for update profile user
 
-     function updateProfile(
-          string memory _email,
-          string memory _name,
-          string memory _image
-     ) external  nonReentrant{
-          require(msg.sender != address(0), "Invalid address");
-          require(bytes(_email).length > 0, "Invalid email");
-          require(msg.sender == users[userCount].user, "Invalid user");
-          require(bytes(_name).length > 0, "Invalid name");
-          require(bytes(_image).length > 0, "Invalid image");
-          users[userCount].email = _email;
-          users[userCount].name = _name;
-          users[userCount].image = _image;
-     }
+    function updateProfile(
+        string memory _email,
+        string memory _name,
+        string memory _image
+    ) external nonReentrant {
+        require(msg.sender != address(0), "Invalid address");
+        require(bytes(_email).length > 0, "Invalid email");
+        require(msg.sender == users[msg.sender].user, "Invalid user");
+        require(bytes(_name).length > 0, "Invalid name");
+        require(bytes(_image).length > 0, "Invalid image");
+        users[msg.sender].email = _email;
+        users[msg.sender].name = _name;
+        users[msg.sender].image = _image;
+    }
 
+    //@dev function for look trades in the market
+    function lookTrades(uint256 _itemId) public view returns (Trade memory) {
+        Trade storage _trade = trades[_itemId];
+        return _trade;
+    }
 
-     //@dev function for look trades in the market
-      function lookTrades(uint256 _itemId) public view returns(Trade memory){
-         Trade storage _trade = trades[_itemId];
-           return _trade;
-     }
+    //@dev function for buy one trade
+    function buyTrade(uint256 _itemId) public payable nonReentrant {
+        require(msg.value == trades[_itemId].price, "Invalid value");
+        require(trades[_itemId].isSold == false, "Invalid trade, item sold");
+        require(trades[_itemId].seller != address(0), "Invalid seller");
+        require(trades[_itemId].seller != msg.sender, "Invalid seller");
+        trades[_itemId].buyer = msg.sender;
+        trades[_itemId].isSold = true;
+        payable(trades[_itemId].seller).transfer(msg.value);
+        delete trades[_itemId];
+    }
 
-     //@dev function for look users in the market
-      function lookUsers(uint256 _userId) public view returns(userData memory){
-         userData storage _user = users[_userId];
-           return _user;
-     }
+    //@dev function for cancel one trade
+    function cancelTrade(uint256 _itemId) public nonReentrant {
+        require(msg.sender != address(0), "Invalid address");
+        require(trades[_itemId].isSold == false, "Invalid trade, item sold");
+        require(trades[_itemId].seller != address(0), "Invalid seller");
+        require(trades[_itemId].seller == msg.sender, "Invalid seller");
+        delete trades[_itemId];
+    }
 
-     //@dev function for buy one trade
-      function buyTrade(uint256 _itemId) public payable nonReentrant{
-          require(msg.value == trades[_itemId].price, "Invalid value");
-          require(trades[_itemId].isSold == false, "Invalid trade, item sold");
-          require(trades[_itemId].seller != address(0), "Invalid seller");
-          require(trades[_itemId].seller != msg.sender, "Invalid seller");
-          trades[_itemId].buyer = msg.sender;
-            trades[_itemId].isSold = true;
-          payable(trades[_itemId].seller).transfer(msg.value);
-          delete trades[_itemId];
-      }
-
-      //@dev function for cancel one trade
-      function cancelTrade(uint256 _itemId) public nonReentrant{
-          require(msg.sender != address(0), "Invalid address");
-          require(trades[_itemId].isSold == false, "Invalid trade, item sold");
-          require(trades[_itemId].seller != address(0), "Invalid seller");
-          require(trades[_itemId].seller == msg.sender, "Invalid seller");
-          delete trades[_itemId];
-      }
-
-      //@dev function for withdraw one trade
-      function cancelAllTrades() public nonReentrant{
-          require(msg.sender != address(0), "Invalid address");
-          for(uint256 i = 1; i <= tradeCount; i++){
-              if(trades[i].seller == msg.sender){
-                  delete trades[i];
-              }
-          }
-}
+    //@dev function for withdraw one trade
+    function cancelAllTrades() public nonReentrant {
+        require(msg.sender != address(0), "Invalid address");
+        for (uint256 i = 1; i <= tradeCount; i++) {
+            if (trades[i].seller == msg.sender) {
+                delete trades[i];
+            }
+        }
+    }
 }
